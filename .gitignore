@@ -31,6 +31,7 @@ venv/
 
 # ---- env and secrets
 .env*
+!.env.example
 *.pem
 
 # ---- logs and coverage

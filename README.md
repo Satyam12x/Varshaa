@@ -57,3 +57,9 @@ Verified conventions:
 5. **District product and verification.** Survey of India districts, with IMD colour codes and CSV export. Verification reports RMSE, POD, FAR, CSI, ETS and FSS by regime, setting and district.
 
 All verification is leave-one-season-out: each monsoon is forecast by models trained only on the other seasons.
+
+## Deploy
+
+- **API on Render** (free Docker web service, `render.yaml`): New + > Blueprint > this repo. The image bundles the Python engine and downloads the runtime data snapshot from the `deploy-data` branch (built by `python tools/deploy/publish_data.py`). The daily cycle runs at 10:15 IST; with `REFRESH_ON_BOOT=1` a restarted instance refreshes a stale snapshot.
+- **Dashboard on Vercel**: root directory `frontend`, env var `NEXT_PUBLIC_API_URL=https://<your-render-service>.onrender.com/api`.
+- **Health / uptimer**: `GET /api/health` (liveness, forecast age, cycle status); `GET /api/health?strict=1` returns 503 when the forecast is stale. From the shell: `cd backend && npm run health -- https://<service>.onrender.com [--strict]`. The `Uptime` GitHub Actions workflow pings it every 10 min (keeps the free instance awake) and runs the strict check daily at 11:00 IST; set the repository variable `VARSHA_API_URL` to enable it.

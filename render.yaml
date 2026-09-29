@@ -1,0 +1,16 @@
+# Render Blueprint: New + > Blueprint > pick this repo. Creates the VARSHA API as a free Docker web service.
+services:
+  - type: web
+    name: varsha-api
+    runtime: docker
+    plan: free
+    region: singapore          # closest Render region to India
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: REFRESH_ON_BOOT   # free plan has no disk: after a restart, re-run the daily cycle if the snapshot is stale
+        value: "1"
+      - key: STALE_HOURS
+        value: "30"

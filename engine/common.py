@@ -80,7 +80,8 @@ _land = None
 def land():
     global _land
     if _land is None:
-        _land = imd_year(2020)[1][200] > -998
+        f = os.path.join(DATA, "land_mask.npy")  # shipped in the deploy bundle instead of the 25 MB IMD year file
+        _land = np.load(f) if os.path.exists(f) else imd_year(2020)[1][200] > -998
     return _land
 
 

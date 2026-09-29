@@ -16,6 +16,7 @@ const DATA = path.join(ROOT, "data");
 const ENGINE = path.join(ROOT, "engine");
 const PYTHON = process.env.PYTHON ?? "python";
 const PORT = Number(process.env.PORT ?? 4080);
+const STALE_HOURS = Number(process.env.STALE_HOURS ?? 30); // a daily product older than this counts as stale
 
 const log = (m: string) => console.log(`[${new Date().toISOString().slice(11, 19)}] ${m}`);
 const readJson = <T = unknown>(p: string): T | null => (fs.existsSync(p) ? (JSON.parse(fs.readFileSync(p, "utf8")) as T) : null);
@@ -62,7 +63,7 @@ async function cycle() {
   try {
     status.step = "Downloading latest NOAA GFS run and IMD rainfall"; await py("ingest.py");
     status.step = "Regime identification, correction and district product"; await py("forecast.py");
-    status.step = "Updating event replays"; await py("replay.py");
+    if (fs.existsSync(path.join(DATA, "models", "cases_lead1.npz"))) { status.step = "Updating event replays"; await py("replay.py"); }
   } catch (e) {
     status.lastError = (e as Error).message; log(`cycle failed: ${status.lastError}`);
   } finally {
@@ -80,7 +81,21 @@ app.use("/api", api);
 const need = (res: Response) => { const p = latest(); if (!p) res.status(503).json({ error: "No forecast product yet: run the engine (POST /api/run)." }); return p; };
 const LEVEL_RANK: Record<string, number> = { green: 0, yellow: 1, orange: 2, red: 3 };
 
-api.get("/health", (_q, res) => res.json({ ok: true }));
+const productAgeHours = (p: Product | null) =>
+  p ? Math.round(((Date.now() - Date.parse(p.generated.replace(/(\.\d{3})\d+/, "$1"))) / 3.6e6) * 10) / 10 : null;
+
+// Liveness for Render and uptime monitors. Add ?strict=1 to get a 503 when the daily forecast is missing or stale.
+api.get("/health", (req, res) => {
+  const p = latest(), age = productAgeHours(p);
+  const fresh = age !== null && age <= STALE_HOURS;
+  const body = {
+    ok: true, service: "varsha-api", time: new Date().toISOString(), uptime_s: Math.round(process.uptime()),
+    product: p ? { issue: p.issue, generated: p.generated, age_hours: age, fresh } : null,
+    cycle: { running: status.running, step: status.step, lastFinished: status.lastFinished, lastError: status.lastError },
+  };
+  if (req.query.strict !== undefined && !fresh) return void res.status(503).json({ ...body, ok: false });
+  res.json(body);
+});
 
 api.get("/meta", (_q, res) => {
   const p = latest();
@@ -125,6 +140,7 @@ api.get("/geo/districts", (_q, res) => res.sendFile(path.join(DATA, "boundaries"
 
 let mask: unknown = null;
 api.get("/geo/landmask", (_q, res) => {
+  if (!mask) mask = readJson(path.join(DATA, "products", "landmask.json"));
   if (!mask) {
     const f = path.join(DATA, "imd_yearly", "2020.grd");
     const buf = fs.readFileSync(f);
@@ -173,3 +189,9 @@ app.listen(PORT, () => log(`VARSHA API on http://localhost:${PORT}/api (engine: 
 
 // Daily cycle at 10:15 IST: IMD's 24 h rainfall (ending 08:30 IST) and the 00 UTC GFS run are both published by then.
 cron.schedule("15 10 * * *", () => { void cycle(); }, { timezone: "Asia/Kolkata" });
+
+// On hosts with no persistent disk (Render free), a restart brings back the deployed snapshot: refresh it once if stale.
+if (process.env.REFRESH_ON_BOOT === "1") {
+  const age = productAgeHours(latest());
+  if (age === null || age > STALE_HOURS) { log(`product is ${age ?? "missing"} h old: running the daily cycle`); setTimeout(() => void cycle(), 5000); }
+}
