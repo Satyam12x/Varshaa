@@ -141,6 +141,19 @@ def classify_spells(anom: pd.Series) -> pd.Series:
     return lab
 
 
+def causal_spells(anom: pd.Series) -> pd.Series:
+    """The same criterion as it can be applied in real time: day t is Active (Break) only once the anomaly has been
+    >= +1 (<= -1) on t and the two days before it. Used for training so labels match what the live system knows."""
+    anom = anom.sort_index()
+    lab = pd.Series("Normal", index=anom.index)
+    for sign, name in [(1, "Active"), (-1, "Break")]:
+        run = 0
+        for k, h in enumerate((anom * sign >= 1).fillna(False).values):
+            run = run + 1 if h else 0
+            if run >= 3: lab.iloc[k] = name
+    return lab
+
+
 def regime_series(obs, N):
     idx = pd.date_range(min(obs), max(obs))
     anom = pd.Series({t: core_anomaly(t, obs[t], N) for t in obs}).reindex(idx)
@@ -160,10 +173,10 @@ def tracks():
 
 
 def depression(issue):
-    """Cells within 6° of an IMD RSMC depression (or stronger) at issue time; returns mask and the systems."""
+    """Cells within 6° of an IMD RSMC depression (or stronger) in the 6 h up to issue time; returns mask and the systems."""
     T = tracks()
     issue = pd.Timestamp(issue)
-    pts = T[(T.time >= issue - pd.Timedelta(hours=6)) & (T.time <= issue + pd.Timedelta(hours=3))]
+    pts = T[(T.time >= issue - pd.Timedelta(hours=6)) & (T.time <= issue)]  # fixes up to the 00 UTC issue time only
     m = np.zeros((NLAT, NLON), bool)
     for _, p in pts.iterrows():
         m |= ((LAT2 - p.lat) ** 2 + ((LON2 - p.lon) * np.cos(np.radians(p.lat))) ** 2) <= 36

@@ -187,9 +187,10 @@ if __name__ == "__main__":
     leads = [int(x) for x in sys.argv[1:]] or C.LEADS
     N = C.normals()
     obs = C.observations()
-    anom, LS = C.regime_series(obs, N)
+    anom, LS_monitor = C.regime_series(obs, N)   # retrospective labels, for the regime timeline only
+    LS = C.causal_spells(anom)                    # causal labels: what was knowable on the day before issue
     json.dump({"dates": [d.strftime("%Y-%m-%d") for d in anom.index], "anom": [None if np.isnan(x) else round(float(x), 3) for x in anom.values],
-               "regime": list(LS.values)}, open(os.path.join(OUT, "regime_history.json"), "w"))
+               "regime": list(LS_monitor.values)}, open(os.path.join(OUT, "regime_history.json"), "w"))
     S, L = C.settings(), C.land()
     for lead in leads:
         run(lead, obs, anom, LS, N, S, L, None)

@@ -19,7 +19,7 @@ COPY engine engine
 # Runtime data snapshot (models, districts, normals, current products) from the deploy-data branch.
 # Bump DATA_REV to force a fresh download after re-running tools/deploy/publish_data.py.
 ARG DATA_URL=https://github.com/Satyam12x/Varshaa/archive/refs/heads/deploy-data.tar.gz
-ARG DATA_REV=1
+ARG DATA_REV=2
 RUN mkdir -p data && curl -fsSL "$DATA_URL?rev=$DATA_REV" | tar -xz --strip-components=1 -C data \
  && /opt/venv/bin/python -c "import eccodes, sklearn; print('eccodes', eccodes.__version__, 'sklearn', sklearn.__version__)"
 

@@ -20,7 +20,7 @@ def regime_now(issue, N):
     if not obs:
         return None, np.nan, "Normal", []
     anom = pd.Series({d: C.core_anomaly(d, g, N) for d, g in obs.items()}).reindex(days)
-    ls = C.classify_spells(anom.where(anom.index.month.isin([6, 7, 8, 9])))
+    ls = C.causal_spells(anom.where(anom.index.month.isin([6, 7, 8, 9])))
     known = anom.last_valid_index()
     return known, float(anom[known]), ls[known] if known in ls.index else "Normal", [
         {"date": d.strftime("%Y-%m-%d"), "anom": None if np.isnan(a) else round(float(a), 2), "regime": ls.get(d, "Normal")} for d, a in anom.items()]
