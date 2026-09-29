@@ -29,7 +29,7 @@ const TABS = [
 type Tab = (typeof TABS)[number]["id"];
 
 export default function Dashboard() {
-  const { meta, error } = useApp();
+  const { meta, error, reload } = useApp();
   const q = useSearchParams();
   const [tab, setTab] = useState<Tab>(() => (TABS.some((t) => t.id === q.get("tab")) ? (q.get("tab") as Tab) : "home"));
   const [lead, setLead] = useState(() => Math.min(5, Math.max(1, Number(q.get("lead") ?? 1) || 1)));
@@ -73,7 +73,7 @@ export default function Dashboard() {
       </header>
 
       <main className="wrap flex flex-col gap-6 py-8">
-        {error && <div className="rounded-xl border border-[var(--line)] bg-[var(--accent-soft)] p-4 text-[14px]">Cannot reach the Varsha server ({error}). Start it with <code>npm run dev</code> in <code>PS 80/backend</code>.</div>}
+        {error && <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[var(--line)] bg-[var(--accent-soft)] p-4 text-[14px]"><span>The VARSHA forecast server is not responding ({error}). It may be waking up; this usually takes under a minute.</span><button onClick={reload} className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-medium text-white">Retry</button></div>}
         {meta && (tab === "rain" || tab === "alerts") && <DayPicker leads={meta.leads} lead={lead} onChange={setLead} />}
         {meta && (
           <>
