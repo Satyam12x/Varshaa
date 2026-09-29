@@ -53,6 +53,8 @@ def make(path, title, subtitle, story, kind):
         c.setFont("UI", 10.5); c.setFillColor(colors.HexColor("#dbe7f6"))
         c.drawString(MARGIN, PAGE_H - 67 * mm, subtitle)
         c.setFont("UI", 8.5); c.drawString(MARGIN, PAGE_H - 80 * mm, f"{kind}  ·  {TODAY}  ·  {REPO}")
+        x0 = MARGIN + c.stringWidth(f"{kind}  ·  {TODAY}  ·  ", "UI", 8.5)
+        c.linkURL(REPO, (x0, PAGE_H - 81.5 * mm, x0 + c.stringWidth(REPO, "UI", 8.5), PAGE_H - 77 * mm), relative=0)
         c.restoreState()
         later(c, doc)
 
@@ -213,17 +215,17 @@ def report():
           *bullets(["Integrate NCUM with NCMRWF and retrain on its hindcasts.", "Add western-disturbance and monsoon-trough regimes from IMDAA circulation fields.",
                     "Verify districts against IMD's district-wise rainfall (CRIS) as well as the grid.", "A U-Net grid correction, used only where the gate shows it helps."])]
     s += [H1("10. References"),
-          *bullets(["Rajeevan, Gadgil & Bhate (2010), J. Earth Syst. Sci. 119. doi:10.1007/s12040-010-0019-4",
-                    "Pai, Sridhar & Ramesh Kumar (2016), Climate Dynamics 46. doi:10.1007/s00382-015-2813-9",
-                    "Pai et al. (2014), Mausam 65. doi:10.54302/mausam.v65i1.851",
-                    "Niranjan Kumar et al. (2022), Hydrological Sciences Journal. doi:10.1080/02626667.2022.2049272",
-                    "Friedman (2001), Annals of Statistics. doi:10.1214/aos/1013203451",
-                    "Niculescu-Mizil & Caruana (2005), ICML. doi:10.1145/1102351.1102430",
-                    "Roberts & Lean (2008), Monthly Weather Review 136. doi:10.1175/2007MWR2123.1",
-                    "Wilks (2019), Statistical Methods in the Atmospheric Sciences, 4th ed. doi:10.1016/C2017-0-03921-6",
-                    "PIB (11 Sept 2024), Cabinet approves Mission Mausam. pib.gov.in PRID 2053896",
-                    "Data: IMD Pune (imdpune.gov.in), NOAA GFS on AWS Open Data, IMD RSMC New Delhi, Survey of India.",
-                    f"Code and evidence: {REPO} (EVIDENCE.md, tools/check_claims.py)."])]
+          *bullets(["Rajeevan, Gadgil & Bhate (2010), J. Earth Syst. Sci. 119. <a href=\"https://doi.org/10.1007/s12040-010-0019-4\" color=\"#2a78d6\">doi:10.1007/s12040-010-0019-4</a>",
+                    "Pai, Sridhar & Ramesh Kumar (2016), Climate Dynamics 46. <a href=\"https://doi.org/10.1007/s00382-015-2813-9\" color=\"#2a78d6\">doi:10.1007/s00382-015-2813-9</a>",
+                    "Pai et al. (2014), Mausam 65. <a href=\"https://doi.org/10.54302/mausam.v65i1.851\" color=\"#2a78d6\">doi:10.54302/mausam.v65i1.851</a>",
+                    "Niranjan Kumar et al. (2022), Hydrological Sciences Journal. <a href=\"https://doi.org/10.1080/02626667.2022.2049272\" color=\"#2a78d6\">doi:10.1080/02626667.2022.2049272</a>",
+                    "Friedman (2001), Annals of Statistics. <a href=\"https://doi.org/10.1214/aos/1013203451\" color=\"#2a78d6\">doi:10.1214/aos/1013203451</a>",
+                    "Niculescu-Mizil & Caruana (2005), ICML. <a href=\"https://doi.org/10.1145/1102351.1102430\" color=\"#2a78d6\">doi:10.1145/1102351.1102430</a>",
+                    "Roberts & Lean (2008), Monthly Weather Review 136. <a href=\"https://doi.org/10.1175/2007MWR2123.1\" color=\"#2a78d6\">doi:10.1175/2007MWR2123.1</a>",
+                    "Wilks (2019), Statistical Methods in the Atmospheric Sciences, 4th ed. <a href=\"https://doi.org/10.1016/C2017-0-03921-6\" color=\"#2a78d6\">doi:10.1016/C2017-0-03921-6</a>",
+                    "PIB (11 Sept 2024), Cabinet approves Mission Mausam. <a href=\"https://www.pib.gov.in/PressReleasePage.aspx?PRID=2053896\" color=\"#2a78d6\">pib.gov.in PRID 2053896</a>",
+                    "Data: <a href=\"https://imdpune.gov.in/cmpg/Griddata/Rainfall_25_NetCDF.html\" color=\"#2a78d6\">IMD Pune gridded rainfall</a>, <a href=\"https://registry.opendata.aws/noaa-gfs-bdp-pds/\" color=\"#2a78d6\">NOAA GFS on AWS Open Data</a>, <a href=\"https://rsmcnewdelhi.imd.gov.in/\" color=\"#2a78d6\">IMD RSMC New Delhi</a>, <a href=\"https://onlinemaps.surveyofindia.gov.in/\" color=\"#2a78d6\">Survey of India</a>.",
+                    f"Code and evidence: <a href=\"{REPO}\" color=\"#2a78d6\">{REPO}</a> (<a href=\"{REPO}/blob/main/EVIDENCE.md\" color=\"#2a78d6\">EVIDENCE.md</a>); live prototype: <a href=\"https://varshaa-eight.vercel.app/\" color=\"#2a78d6\">varshaa-eight.vercel.app</a>."])]
     make(os.path.join(DOCS, "VARSHA_Project_Report.pdf"), "Project Report", "Regime-aware AI post-processing of monsoon rainfall forecasts", s, "Report")
 
 
