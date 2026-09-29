@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* VARSHA — "monsoon" identity: deep monsoon-sea blue, rain-cloud slate, marigold highlight.
+   Amber / orange / red are reserved for heavy-rain danger levels only. */
+:root {
+  color-scheme: light;
+  --bg: #f3f6f8;          /* after-rain sky */
+  --surface: #ffffff;
+  --panel: #e9f0f4;       /* light cloud */
+  --panel2: #fdf4e3;      /* marigold wash */
+  --ink: #0f1f2b;         /* storm cloud */
+  --muted: #53646f;
+  --faint: #8595a0;
+  --line: #dbe4ea;
+  --grid: #e8eef2;
+  --brand: #0b4f6c;       /* monsoon sea */
+  --accent: #0b4f6c;
+  --accent-ink: #083b51;
+  --accent-soft: #dcebf2;
+  --marigold: #e9a23b;
+  --good: #0b4f6c;
+  --bad: #b3261e;
+  --map-sea: #f8fbfc;
+  --map-land: #e6edf1;
+  --district-line: rgba(15, 31, 43, 0.22);
+  --brand-btn: #0b4f6c;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+h1, h2, .serif {
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+@media (min-width: 768px) {
+  .wrap { padding-left: 22px; padding-right: 22px; }
+}
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+::selection { background: var(--accent-soft); }
+
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
